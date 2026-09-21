@@ -1,0 +1,14 @@
+# Environment — never commit credentials
+.env
+
+# Composer
+vendor/
+composer.phar
+*.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+storage/logs/*.log
