@@ -131,6 +131,9 @@
     <div class="admin-sidebar__section">Messages</div>
     <a href="index.php?page=contacts"    <?= ($activePage??'')==='contacts'    ?'class="active"':'' ?>>✉️ Contacts</a>
 
+    <div class="admin-sidebar__section">Account</div>
+    <a href="index.php?page=password" <?= ($activePage??'')==='password' ?'class="active"':'' ?>>🔑 Change Password</a>
+
     <div class="admin-sidebar__section">Site</div>
     <a href="../index.php" target="_blank">↗ View Site</a>
   </aside>
