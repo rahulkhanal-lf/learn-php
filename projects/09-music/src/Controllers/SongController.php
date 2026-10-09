@@ -41,19 +41,15 @@ class SongController {
                 'duration_seconds' => (int) $_POST['duration_seconds'] ?: null,
                 'release_year'     => (int) $_POST['release_year'] ?: null,
             ]);
-            header('Location: index.php?msg=created');
+            header('Location: index.php?page=songs&msg=created');
             return;
         }
-
-        $songs   = $this->songModel->findAll();
-        $artists = $this->artistModel->allForSelect();
-        require __DIR__ . '/../../public/views/songs/index.php';
     }
 
     public function delete(): void {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id) $this->songModel->delete($id);
-        header('Location: index.php?msg=deleted');
+        header('Location: index.php?page=songs&msg=deleted');
     }
 
     private function validate(array $data): array {

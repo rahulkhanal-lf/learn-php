@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <!-- Red/orange swoosh line (matches Kutumba brand) -->
+  <path d="M10 45 Q60 10 190 38" stroke="#cc0000" stroke-width="2.5" fill="none"/>
+  <path d="M10 48 Q60 14 190 42" stroke="#ff6600" stroke-width="1" fill="none" opacity="0.6"/>
+  <!-- KUTUMBA text -->
+  <text x="10" y="36" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800"
+        letter-spacing="4" fill="#1a1a1a" text-rendering="geometricPrecision">KUTUMBA</text>
+</svg>
