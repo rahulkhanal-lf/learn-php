@@ -28,8 +28,18 @@ $currentPage = 'home';
 //   @type    → the kind of thing (MusicGroup, Person, Event, Product, etc.)
 //   member   → list of people in the group
 //
-$pdo_seo   = Connection::getInstance();
+$pdo_seo    = Connection::getInstance();
 $seoMembers = $pdo_seo->query("SELECT name, instrument FROM members ORDER BY display_order ASC")->fetchAll();
+$heroSlides = $pdo_seo->query("SELECT * FROM hero_slides ORDER BY display_order ASC")->fetchAll();
+
+// Fallback to placeholder slides if none have been uploaded yet
+if (empty($heroSlides)) {
+    $heroSlides = [
+        ['image' => 'slide1.jpg', 'alt_text' => 'Kutumba performing'],
+        ['image' => 'slide2.jpg', 'alt_text' => 'Kutumba on stage'],
+        ['image' => 'slide3.jpg', 'alt_text' => 'Kutumba musicians'],
+    ];
+}
 
 $jsonLd = [
     '@context' => 'https://schema.org',
@@ -62,25 +72,28 @@ ob_start();
 <section class="hero" aria-label="Hero slideshow">
 
   <div class="hero__slides" id="hero-slides">
-    <div class="hero__slide active" style="background-image:url('images/hero/slide1.jpg')">
-      <div class="hero__overlay"></div>
-    </div>
-    <div class="hero__slide" style="background-image:url('images/hero/slide2.jpg')">
-      <div class="hero__overlay"></div>
-    </div>
-    <div class="hero__slide" style="background-image:url('images/hero/slide3.jpg')">
-      <div class="hero__overlay"></div>
-    </div>
+    <?php foreach ($heroSlides as $i => $slide): ?>
+      <div class="hero__slide <?= $i === 0 ? 'active' : '' ?>"
+           style="background-image:url('images/hero/<?= htmlspecialchars($slide['image'], ENT_QUOTES, 'UTF-8') ?>')"
+           role="img"
+           aria-label="<?= htmlspecialchars($slide['alt_text'] ?: 'Kutumba', ENT_QUOTES, 'UTF-8') ?>">
+        <div class="hero__overlay"></div>
+      </div>
+    <?php endforeach; ?>
   </div>
 
+  <?php if (count($heroSlides) > 1): ?>
   <button class="hero__btn hero__btn--prev" id="hero-prev" aria-label="Previous slide">&#8249;</button>
   <button class="hero__btn hero__btn--next" id="hero-next" aria-label="Next slide">&#8250;</button>
 
   <div class="hero__dots" id="hero-dots">
-    <button class="hero__dot active" data-index="0" aria-label="Slide 1"></button>
-    <button class="hero__dot"        data-index="1" aria-label="Slide 2"></button>
-    <button class="hero__dot"        data-index="2" aria-label="Slide 3"></button>
+    <?php foreach ($heroSlides as $i => $slide): ?>
+      <button class="hero__dot <?= $i === 0 ? 'active' : '' ?>"
+              data-index="<?= $i ?>"
+              aria-label="Slide <?= $i + 1 ?>"></button>
+    <?php endforeach; ?>
   </div>
+  <?php endif; ?>
 
 </section>
 

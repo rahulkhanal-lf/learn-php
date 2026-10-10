@@ -72,8 +72,10 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS contacts (
     name       VARCHAR(150) NOT NULL,
     email      VARCHAR(150) NOT NULL,
     message    TEXT,
+    is_read    TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
+try { $pdo->exec("ALTER TABLE contacts ADD COLUMN is_read TINYINT(1) DEFAULT 0"); } catch (\Exception $e) {}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
     id           INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,6 +102,13 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
     username      VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+$pdo->exec("CREATE TABLE IF NOT EXISTS hero_slides (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    image         VARCHAR(255) NOT NULL,
+    alt_text      VARCHAR(255) DEFAULT '',
+    display_order INT DEFAULT 0
 )");
 
 // ── Alt-text columns (SEO) ────────────────────────────────────────────────────

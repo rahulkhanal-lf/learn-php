@@ -43,6 +43,7 @@ $routes = [
     'archives'    => BASE_PATH . '/views/admin/archives.php',
     'contacts'    => BASE_PATH . '/views/admin/contacts.php',
     'gallery'     => BASE_PATH . '/views/admin/gallery.php',
+    'hero'        => BASE_PATH . '/views/admin/hero.php',
     'password'    => BASE_PATH . '/views/admin/password.php',
 ];
 

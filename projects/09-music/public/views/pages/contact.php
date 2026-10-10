@@ -13,6 +13,7 @@
  */
 
 use App\Models\Contact;
+use App\Helpers\Mailer;
 
 session_start();
 
@@ -49,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
 
-        // Save to DB via Contact model (PDO prepared statement)
+        // Save to DB — this always succeeds regardless of email status
         (new Contact())->save([
             'name'    => $name,
             'email'   => $email,
@@ -57,15 +58,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         /*
-         * CONCEPT: PRG Pattern (Post / Redirect / Get)
-         * After a successful POST, redirect to the same page (GET).
-         * This prevents "Do you want to resubmit?" on browser refresh.
+         * CONCEPT: PHPMailer — PHP's equivalent of Nodemailer in Node.js.
          *
-         * Flash message: store success in session, read after redirect.
-         * $_SESSION persists across redirects (same browser session).
+         * Node.js (Nodemailer):           PHP (PHPMailer):
+         *   createTransport({ host })  →  $mail->isSMTP(); $mail->Host
+         *   transporter.sendMail()     →  $mail->send()
+         *
+         * We wrap in try/catch so a misconfigured SMTP never breaks the form.
+         * The message is already saved in the DB — email is a bonus notification.
          */
+        try {
+            Mailer::contactNotification($name, $email, $message);
+        } catch (\Exception $e) {
+            // Log but don't show to user — DB save already succeeded
+            error_log('Mailer error: ' . $e->getMessage());
+        }
+
         $_SESSION['flash'] = ['type' => 'success', 'text' => 'Thank you! Your message has been sent.'];
-        header('Location: index.php?page=contact');
+        header('Location: contact');
         exit;
 
     } else {

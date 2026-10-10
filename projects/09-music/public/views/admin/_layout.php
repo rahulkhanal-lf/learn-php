@@ -136,9 +136,25 @@
     <a href="index.php?page=initiatives" <?= ($activePage??'')==='initiatives' ?'class="active"':'' ?>>🌱 Initiatives</a>
     <a href="index.php?page=archives"    <?= ($activePage??'')==='archives'    ?'class="active"':'' ?>>📁 Archives</a>
     <a href="index.php?page=gallery"     <?= ($activePage??'')==='gallery'     ?'class="active"':'' ?>>🖼️ Gallery</a>
+    <a href="index.php?page=hero"        <?= ($activePage??'')==='hero'        ?'class="active"':'' ?>>🖼️ Hero Slides</a>
 
     <div class="admin-sidebar__section">Messages</div>
-    <a href="index.php?page=contacts"    <?= ($activePage??'')==='contacts'    ?'class="active"':'' ?>>✉️ Contacts</a>
+    <?php
+    // Unread badge — small DB query on every admin page load
+    try {
+        $unreadCount = (new \App\Database\Connection)::getInstance()
+            ->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")
+            ->fetchColumn();
+    } catch (\Exception $e) { $unreadCount = 0; }
+    ?>
+    <a href="index.php?page=contacts" <?= ($activePage??'')==='contacts' ?'class="active"':'' ?>>
+      ✉️ Contacts
+      <?php if ($unreadCount > 0): ?>
+        <span style="margin-left:auto;background:var(--orange);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;line-height:1.6">
+          <?= $unreadCount ?>
+        </span>
+      <?php endif; ?>
+    </a>
 
     <div class="admin-sidebar__section">Account</div>
     <a href="index.php?page=password" <?= ($activePage??'')==='password' ?'class="active"':'' ?>>🔑 Change Password</a>
