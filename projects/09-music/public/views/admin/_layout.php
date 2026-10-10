@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($adminTitle ?? 'Admin', ENT_QUOTES, 'UTF-8') ?> — Kutumba Admin</title>
   <link rel="stylesheet" href="../css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
   <style>
     body { background: #f4f4f5; display: flex; flex-direction: column; min-height: 100vh; }
 
@@ -97,6 +98,14 @@
     .admin-flash { padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: .88rem; font-weight: 500; }
     .admin-flash--ok  { background: rgba(34,197,94,.1); color: #15803d; border: 1px solid rgba(34,197,94,.3); }
     .admin-flash--err { background: rgba(239,68,68,.1);  color: #b91c1c; border: 1px solid rgba(239,68,68,.3); }
+
+    /* ── Drag-and-drop ── */
+    .drag-handle { cursor: grab; color: #c4c4cc; font-size: 1rem; padding: 0 2px; user-select: none; display: inline-block; }
+    .drag-handle:hover { color: #71717a; }
+    .drag-handle:active { cursor: grabbing; }
+    .sortable-ghost td { background: #fff7ed !important; opacity: .5; }
+    .sortable-drag { background: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+    #reorder-saved { display:none; position:fixed; bottom:24px; right:24px; background:#15803d; color:#fff; padding:10px 18px; border-radius:8px; font-size:.84rem; font-weight:600; z-index:999; box-shadow:0 4px 12px rgba(0,0,0,.2); }
   </style>
 </head>
 <body>
@@ -153,5 +162,35 @@
   </main>
 
 </div>
+
+<div id="reorder-saved">Order saved ✓</div>
+
+<script>
+function initSortable(tbodyId, pageParam) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody || typeof Sortable === 'undefined') return;
+    Sortable.create(tbody, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        onEnd: function () {
+            const ids = [...tbody.querySelectorAll('tr[data-id]')].map(r => r.dataset.id);
+            const form = new FormData();
+            form.append('_action', 'reorder');
+            ids.forEach(id => form.append('ids[]', id));
+            fetch('index.php?page=' + pageParam, { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        const toast = document.getElementById('reorder-saved');
+                        toast.style.display = 'block';
+                        setTimeout(() => toast.style.display = 'none', 2000);
+                    }
+                });
+        }
+    });
+}
+</script>
 </body>
 </html>

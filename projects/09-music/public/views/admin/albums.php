@@ -12,8 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($act === 'create') {
             $cover = Upload::handle('cover_image', $imgDir) ?? 'placeholder.jpg';
-            $pdo->prepare("INSERT INTO albums (title, year, cover_image, description) VALUES (?,?,?,?)")
-                ->execute([trim($_POST['title']), $_POST['year']?:null, $cover, trim($_POST['description'])]);
+            $pdo->prepare("INSERT INTO albums (title, year, cover_image, description, alt_text) VALUES (?,?,?,?,?)")
+                ->execute([trim($_POST['title']), $_POST['year']?:null, $cover, trim($_POST['description']), trim($_POST['alt_text'])]);
             $_SESSION['flash'] = 'Album added.';
         }
         if ($act === 'update') {
@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newCover = Upload::handle('cover_image', $imgDir);
             if ($newCover && $oldCover !== 'placeholder.jpg') Upload::delete($oldCover, $imgDir);
             $cover = $newCover ?? $oldCover;
-            $pdo->prepare("UPDATE albums SET title=?, year=?, cover_image=?, description=? WHERE id=?")
-                ->execute([trim($_POST['title']), $_POST['year']?:null, $cover, trim($_POST['description']), (int)$_POST['id']]);
+            $pdo->prepare("UPDATE albums SET title=?, year=?, cover_image=?, description=?, alt_text=? WHERE id=?")
+                ->execute([trim($_POST['title']), $_POST['year']?:null, $cover, trim($_POST['description']), trim($_POST['alt_text']), (int)$_POST['id']]);
             $_SESSION['flash'] = 'Album updated.';
         }
         if ($act === 'delete') {
@@ -65,6 +65,10 @@ $adminTitle = 'Albums'; $activePage = 'albums'; ob_start();
       <span style="font-size:.75rem;color:var(--muted)">JPG, PNG, WEBP · max 5 MB</span>
     </div>
     <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea name="description"><?= htmlspecialchars($edit['description']??'',ENT_QUOTES,'UTF-8') ?></textarea></div>
+    <div class="form-group" style="grid-column:1/-1">
+      <label>Cover Image Alt Text <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:.8rem"> — e.g. "Kutumba self-titled debut album cover, 2008"</span></label>
+      <input type="text" name="alt_text" placeholder="Describe the album cover" value="<?= htmlspecialchars($edit['alt_text']??'',ENT_QUOTES,'UTF-8') ?>">
+    </div>
     <div style="grid-column:1/-1;display:flex;gap:10px">
       <button type="submit" class="btn btn-orange"><?= $edit ? 'Update' : 'Add Album' ?></button>
       <?php if ($edit): ?><a href="index.php?page=albums" class="btn btn-outline">Cancel</a><?php endif; ?>

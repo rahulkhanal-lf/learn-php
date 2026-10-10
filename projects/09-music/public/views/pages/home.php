@@ -12,9 +12,41 @@
 
 use App\Models\Instrument;
 
+use App\Database\Connection;
+
 $instruments = (new Instrument())->findAll();
 $pageTitle   = 'Home';
 $currentPage = 'home';
+
+// ── JSON-LD: MusicGroup structured data ───────────────────────────────────────
+// CONCEPT: JSON-LD (JavaScript Object Notation for Linked Data)
+//   We embed machine-readable data about this band using Schema.org vocabulary.
+//   Google uses this to build Knowledge Panels, rich results, and understand
+//   what type of entity this site represents — without parsing prose text.
+//
+//   @context → defines the vocabulary (Schema.org)
+//   @type    → the kind of thing (MusicGroup, Person, Event, Product, etc.)
+//   member   → list of people in the group
+//
+$pdo_seo   = Connection::getInstance();
+$seoMembers = $pdo_seo->query("SELECT name, instrument FROM members ORDER BY display_order ASC")->fetchAll();
+
+$jsonLd = [
+    '@context' => 'https://schema.org',
+    '@type'    => 'MusicGroup',
+    'name'     => 'Kutumba',
+    'description' => 'Nepal\'s premier folk instrumental ensemble committed to the research, preservation and celebration of indigenous Nepali music.',
+    'genre'    => ['Folk music', 'Traditional music', 'World music'],
+    'foundingLocation' => [
+        '@type' => 'Place',
+        'name'  => 'Kathmandu, Nepal',
+    ],
+    'member' => array_map(fn($m) => [
+        '@type'             => 'OrganizationRole',
+        'roleName'          => $m['instrument'] ?? 'Musician',
+        'member'            => ['@type' => 'Person', 'name' => $m['name']],
+    ], $seoMembers),
+];
 
 // ob_start() buffers all output until ob_get_clean().
 // Nothing is sent to the browser yet — it goes into memory.

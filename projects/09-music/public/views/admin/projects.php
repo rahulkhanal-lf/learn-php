@@ -3,6 +3,16 @@ use App\Database\Connection;
 
 $pdo = Connection::getInstance();
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'reorder') {
+    $ids = array_map('intval', $_POST['ids'] ?? []);
+    foreach ($ids as $i => $id) {
+        $pdo->prepare("UPDATE projects SET display_order = ? WHERE id = ?")->execute([$i + 1, $id]);
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['_action'] ?? '';
     if ($act === 'create') {
@@ -37,7 +47,7 @@ $adminTitle = 'Projects'; $activePage = 'projects'; ob_start();
     <?php if ($edit): ?><input type="hidden" name="id" value="<?= $edit['id'] ?>"><?php endif; ?>
     <div class="form-group" style="grid-column:1/-1"><label>Title</label><input type="text" name="title" required value="<?= htmlspecialchars($edit['title']??'',ENT_QUOTES,'UTF-8') ?>"></div>
     <div class="form-group"><label>Year</label><input type="number" name="year" value="<?= $edit['year']??'' ?>"></div>
-    <div class="form-group"><label>Display Order</label><input type="number" name="display_order" value="<?= (int)($edit['display_order']??0) ?>"></div>
+    <input type="hidden" name="display_order" value="<?= (int)($edit['display_order']??0) ?>">
     <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea name="description"><?= htmlspecialchars($edit['description']??'',ENT_QUOTES,'UTF-8') ?></textarea></div>
     <div style="grid-column:1/-1;display:flex;gap:10px">
       <button type="submit" class="btn btn-orange"><?= $edit ? 'Update' : 'Add Project' ?></button>
@@ -48,14 +58,13 @@ $adminTitle = 'Projects'; $activePage = 'projects'; ob_start();
 
 <div class="admin-table-wrap">
   <table class="admin-table">
-    <thead><tr><th>#</th><th>Title</th><th>Year</th><th>Order</th><th>Actions</th></tr></thead>
-    <tbody>
+    <thead><tr><th style="width:32px"></th><th>Title</th><th>Year</th><th>Actions</th></tr></thead>
+    <tbody id="sortable-projects">
       <?php foreach ($items as $r): ?>
-        <tr>
-          <td style="color:var(--muted)"><?= $r['id'] ?></td>
+        <tr data-id="<?= $r['id'] ?>">
+          <td><span class="drag-handle" title="Drag to reorder">⠿</span></td>
           <td><?= htmlspecialchars($r['title'],ENT_QUOTES,'UTF-8') ?></td>
           <td><?= $r['year'] ?></td>
-          <td><?= $r['display_order'] ?></td>
           <td>
             <a href="index.php?page=projects&edit=<?= $r['id'] ?>" class="action-link action-link--edit">Edit</a>
             <form method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
@@ -69,4 +78,5 @@ $adminTitle = 'Projects'; $activePage = 'projects'; ob_start();
   </table>
 </div>
 
-<?php $adminContent = ob_get_clean(); require BASE_PATH . '/views/admin/_layout.php';
+<?php $adminContent = ob_get_clean(); require BASE_PATH . '/views/admin/_layout.php'; ?>
+<script>initSortable('sortable-projects', 'projects');</script>

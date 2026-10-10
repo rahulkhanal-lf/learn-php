@@ -59,7 +59,7 @@ ob_start();
           <img
             class="member-card__photo"
             src="images/members/<?= htmlspecialchars($member['photo'] ?? 'placeholder.jpg', ENT_QUOTES, 'UTF-8') ?>"
-            alt="<?= htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8') ?>"
+            alt="<?= htmlspecialchars($member['alt_text'] ?: ($member['name'] . ', ' . ($member['instrument'] ?? 'Musician') . ' of Kutumba'), ENT_QUOTES, 'UTF-8') ?>"
             loading="lazy"
           >
 

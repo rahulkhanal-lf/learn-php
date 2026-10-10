@@ -1,0 +1,35 @@
+# .htaccess — Apache URL rewriting for clean URLs
+#
+# CONCEPT: mod_rewrite
+#   Apache reads this file on every request.
+#   RewriteRule lets us change what file is actually served without
+#   changing the URL the browser sees.
+#
+#   Before: http://localhost/.../public/index.php?page=about
+#   After:  http://localhost/.../public/about
+#
+# HOW IT WORKS:
+#   1. A request arrives for /public/about
+#   2. Apache checks: is "about" a real file? No. Is it a real directory? No.
+#   3. The RewriteRule fires: rewrite "about" → index.php?page=about
+#   4. index.php runs and serves the About page
+#   5. The browser URL still shows /public/about — clean!
+
+Options -Indexes
+RewriteEngine On
+
+# RewriteBase = the URL path to this directory.
+# Required so that relative rewrite targets resolve correctly.
+RewriteBase /learn-php/projects/09-music/public/
+
+# Pass real files and directories through without rewriting.
+# This ensures CSS, images, JS, and PHP files like setup.php still load normally.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite   /about  →  index.php?page=about
+# ^([a-z0-9_-]+)  matches one path segment (letters, digits, hyphens, underscores)
+# $1               is the captured segment, passed as the ?page= value
+# [L]              stop processing rules after this one
+# [QSA]            append any existing query string (e.g. ?edit=3) to the rewritten URL
+RewriteRule ^([a-z0-9_-]+)/?$  index.php?page=$1  [L,QSA]

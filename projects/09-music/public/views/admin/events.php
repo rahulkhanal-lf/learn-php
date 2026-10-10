@@ -3,6 +3,16 @@ use App\Database\Connection;
 
 $pdo = Connection::getInstance();
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'reorder') {
+    $ids = array_map('intval', $_POST['ids'] ?? []);
+    foreach ($ids as $i => $id) {
+        $pdo->prepare("UPDATE events SET display_order = ? WHERE id = ?")->execute([$i + 1, $id]);
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['_action'] ?? '';
     if ($act === 'create') {
@@ -40,7 +50,7 @@ $adminTitle = 'Events'; $activePage = 'events'; ob_start();
     <div class="form-group"><label>Date Text</label><input type="text" name="date_text" placeholder="e.g. March 8" value="<?= htmlspecialchars($edit['date_text']??'',ENT_QUOTES,'UTF-8') ?>"></div>
     <div class="form-group"><label>Location</label><input type="text" name="location" value="<?= htmlspecialchars($edit['location']??'',ENT_QUOTES,'UTF-8') ?>"></div>
     <div class="form-group"><label>Image filename</label><input type="text" name="image" placeholder="event.jpg" value="<?= htmlspecialchars($edit['image']??'',ENT_QUOTES,'UTF-8') ?>"></div>
-    <div class="form-group"><label>Display Order</label><input type="number" name="display_order" value="<?= (int)($edit['display_order']??0) ?>"></div>
+    <input type="hidden" name="display_order" value="<?= (int)($edit['display_order']??0) ?>">
     <div class="form-group" style="align-items:flex-start;padding-top:24px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;font-size:.88rem">
         <input type="checkbox" name="is_upcoming" <?= !empty($edit['is_upcoming'])?'checked':'' ?>> Mark as Upcoming
@@ -55,11 +65,11 @@ $adminTitle = 'Events'; $activePage = 'events'; ob_start();
 
 <div class="admin-table-wrap">
   <table class="admin-table">
-    <thead><tr><th>#</th><th>Title</th><th>Year</th><th>Location</th><th>Upcoming</th><th>Actions</th></tr></thead>
-    <tbody>
+    <thead><tr><th style="width:32px"></th><th>Title</th><th>Year</th><th>Location</th><th>Upcoming</th><th>Actions</th></tr></thead>
+    <tbody id="sortable-events">
       <?php foreach ($items as $r): ?>
-        <tr>
-          <td style="color:var(--muted)"><?= $r['id'] ?></td>
+        <tr data-id="<?= $r['id'] ?>">
+          <td><span class="drag-handle" title="Drag to reorder">⠿</span></td>
           <td><?= htmlspecialchars($r['title'],ENT_QUOTES,'UTF-8') ?></td>
           <td><?= $r['year'] ?></td>
           <td><?= htmlspecialchars($r['location']??'',ENT_QUOTES,'UTF-8') ?></td>
@@ -77,4 +87,5 @@ $adminTitle = 'Events'; $activePage = 'events'; ob_start();
   </table>
 </div>
 
-<?php $adminContent = ob_get_clean(); require BASE_PATH . '/views/admin/_layout.php';
+<?php $adminContent = ob_get_clean(); require BASE_PATH . '/views/admin/_layout.php'; ?>
+<script>initSortable('sortable-events', 'events');</script>

@@ -59,15 +59,61 @@ $routes = [
 
 // ── Resolve Page ──────────────────────────────────────────────────────────────
 
-// $_GET['page'] is untrusted user input — only use it to look up our whitelist.
 $page = $_GET['page'] ?? 'home';
 
-// array_key_exists: check key exists (safer than isset for explicit null values)
 if (!array_key_exists($page, $routes)) {
-    $page = 'home'; // unknown pages fall back to home (or you could show a 404)
+    $page = 'home';
 }
+
+// ── Per-page SEO meta ─────────────────────────────────────────────────────────
+//
+// CONCEPT: Each page gets its own <meta name="description"> (150–160 chars).
+// Google shows this text in search results below the page title.
+// We also set $ogImage for the Open Graph image tag.
+// The page file can override these by setting them again before ob_get_clean().
+//
+$pageMeta = [
+    'home'     => [
+        'desc'  => 'Kutumba — Nepal\'s premier folk instrumental ensemble. Discover authentic Nepali music, our musicians, albums, and upcoming events.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'about'    => [
+        'desc'  => 'Meet the musicians of Kutumba — a folk instrumental ensemble committed to preserving the diversity of indigenous Nepali music.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'albums'   => [
+        'desc'  => 'Explore albums released by Kutumba — Nepal\'s leading folk instrumental ensemble celebrating traditional Nepali sounds.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'events'   => [
+        'desc'  => 'Upcoming and past performances by Kutumba — concerts, cultural festivals, and events across Nepal and beyond.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'projects' => [
+        'desc'  => 'Kutumba\'s musical projects — research, collaborations, and creative initiatives rooted in Nepali folk tradition.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'archives' => [
+        'desc'  => 'Historical archive of Kutumba\'s performances, recordings, and milestones since the band\'s founding.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'gallery'  => [
+        'desc'  => 'Photo gallery of Kutumba — behind the scenes, on stage, and cultural moments captured in images.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'contact'  => [
+        'desc'  => 'Contact Kutumba for bookings, collaborations, media inquiries, and general questions.',
+        'image' => 'images/og-default.jpg',
+    ],
+    'profile'  => [
+        'desc'  => 'Kutumba band profile — the story, instruments, and musical heritage of Nepal\'s folk instrumental ensemble.',
+        'image' => 'images/og-default.jpg',
+    ],
+];
+
+$metaDesc = $pageMeta[$page]['desc']  ?? '';
+$ogImage  = $pageMeta[$page]['image'] ?? 'images/og-default.jpg';
 
 // ── Dispatch ──────────────────────────────────────────────────────────────────
 
-// require the resolved, whitelisted file path — safe.
 require $routes[$page];

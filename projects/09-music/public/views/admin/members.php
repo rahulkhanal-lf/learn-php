@@ -17,14 +17,24 @@ $imgDir  = BASE_PATH . '/images/members/';
 $imgUrl  = '../images/members/';
 $error   = '';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'reorder') {
+    $ids = array_map('intval', $_POST['ids'] ?? []);
+    foreach ($ids as $i => $id) {
+        $pdo->prepare("UPDATE members SET display_order = ? WHERE id = ?")->execute([$i + 1, $id]);
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['_action'] ?? '';
 
     try {
         if ($act === 'create') {
             $photo = Upload::handle('photo', $imgDir) ?? 'placeholder.jpg';
-            $pdo->prepare("INSERT INTO members (name, instrument, bio, photo, display_order) VALUES (?,?,?,?,?)")
-                ->execute([trim($_POST['name']), trim($_POST['instrument']), trim($_POST['bio']), $photo, (int)$_POST['display_order']]);
+            $pdo->prepare("INSERT INTO members (name, instrument, bio, photo, display_order, alt_text) VALUES (?,?,?,?,?,?)")
+                ->execute([trim($_POST['name']), trim($_POST['instrument']), trim($_POST['bio']), $photo, (int)$_POST['display_order'], trim($_POST['alt_text'])]);
             $_SESSION['flash'] = 'Member added.';
         }
 
@@ -35,12 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $newPhoto = Upload::handle('photo', $imgDir);
             if ($newPhoto && $oldPhoto !== 'placeholder.jpg') {
-                Upload::delete($oldPhoto, $imgDir); // remove old file
+                Upload::delete($oldPhoto, $imgDir);
             }
             $photo = $newPhoto ?? $oldPhoto;
 
-            $pdo->prepare("UPDATE members SET name=?, instrument=?, bio=?, photo=?, display_order=? WHERE id=?")
-                ->execute([trim($_POST['name']), trim($_POST['instrument']), trim($_POST['bio']), $photo, (int)$_POST['display_order'], (int)$_POST['id']]);
+            $pdo->prepare("UPDATE members SET name=?, instrument=?, bio=?, photo=?, display_order=?, alt_text=? WHERE id=?")
+                ->execute([trim($_POST['name']), trim($_POST['instrument']), trim($_POST['bio']), $photo, (int)$_POST['display_order'], trim($_POST['alt_text']), (int)$_POST['id']]);
             $_SESSION['flash'] = 'Member updated.';
         }
 
@@ -102,6 +112,14 @@ ob_start();
       <textarea name="bio"><?= htmlspecialchars($editMember['bio'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
     </div>
 
+    <div class="form-group" style="grid-column:1/-1">
+      <label>
+        Image Alt Text
+        <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:.8rem"> — describes the photo for screen readers &amp; Google (e.g. "Rajan Shrestha playing sarangi")</span>
+      </label>
+      <input type="text" name="alt_text" placeholder="Describe the photo in a few words" value="<?= htmlspecialchars($editMember['alt_text'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+    </div>
+
     <!-- Photo upload with current image preview -->
     <div class="form-group">
       <label>Photo <?= $editMember ? '(leave empty to keep current)' : '' ?></label>
@@ -113,10 +131,7 @@ ob_start();
       <span style="font-size:.75rem;color:var(--muted)">JPG, PNG, WEBP · max 5 MB</span>
     </div>
 
-    <div class="form-group">
-      <label>Display Order</label>
-      <input type="number" name="display_order" value="<?= (int)($editMember['display_order'] ?? 0) ?>">
-    </div>
+    <input type="hidden" name="display_order" value="<?= (int)($editMember['display_order'] ?? 0) ?>">
 
     <div style="grid-column:1/-1;display:flex;gap:10px">
       <button type="submit" class="btn btn-orange"><?= $editMember ? 'Update Member' : 'Add Member' ?></button>
@@ -130,17 +145,17 @@ ob_start();
 <!-- Table -->
 <div class="admin-table-wrap">
   <table class="admin-table">
-    <thead><tr><th>Photo</th><th>Name</th><th>Instrument</th><th>Order</th><th>Actions</th></tr></thead>
-    <tbody>
+    <thead><tr><th style="width:32px"></th><th>Photo</th><th>Name</th><th>Instrument</th><th>Actions</th></tr></thead>
+    <tbody id="sortable-members">
       <?php foreach ($members as $m): ?>
-        <tr>
+        <tr data-id="<?= $m['id'] ?>">
+          <td><span class="drag-handle" title="Drag to reorder">⠿</span></td>
           <td>
             <img src="<?= $imgUrl . htmlspecialchars($m['photo'] ?? 'placeholder.jpg', ENT_QUOTES, 'UTF-8') ?>"
                  style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">
           </td>
           <td><?= htmlspecialchars($m['name'], ENT_QUOTES, 'UTF-8') ?></td>
           <td style="color:var(--muted)"><?= htmlspecialchars($m['instrument'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= $m['display_order'] ?></td>
           <td>
             <a href="index.php?page=members&edit=<?= $m['id'] ?>" class="action-link action-link--edit">Edit</a>
             <form method="POST" style="display:inline" onsubmit="return confirm('Delete this member?')">
@@ -158,3 +173,4 @@ ob_start();
 <?php
 $adminContent = ob_get_clean();
 require BASE_PATH . '/views/admin/_layout.php';
+?><script>initSortable('sortable-members', 'members');</script>

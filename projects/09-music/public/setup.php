@@ -102,6 +102,17 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
+// ── Alt-text columns (SEO) ────────────────────────────────────────────────────
+// CONCEPT: ALTER TABLE with try/catch
+//   CREATE TABLE IF NOT EXISTS won't touch existing tables, so we need ALTER TABLE
+//   to add new columns to tables that were already created.
+//   MySQL throws an error if the column already exists, so we catch it silently —
+//   the column is there either way, which is what we want.
+//
+try { $pdo->exec("ALTER TABLE members     ADD COLUMN alt_text VARCHAR(255) DEFAULT ''"); } catch (\Exception $e) {}
+try { $pdo->exec("ALTER TABLE instruments ADD COLUMN alt_text VARCHAR(255) DEFAULT ''"); } catch (\Exception $e) {}
+try { $pdo->exec("ALTER TABLE albums      ADD COLUMN alt_text VARCHAR(255) DEFAULT ''"); } catch (\Exception $e) {}
+
 // ── Seed Data ─────────────────────────────────────────────────────────────────
 
 // Members

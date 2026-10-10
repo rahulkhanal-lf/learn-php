@@ -46,7 +46,7 @@ ob_start();
 
             <img
               src="images/albums/<?= htmlspecialchars($album['cover_image'] ?? 'placeholder.jpg', ENT_QUOTES, 'UTF-8') ?>"
-              alt="<?= htmlspecialchars($album['title'], ENT_QUOTES, 'UTF-8') ?>"
+              alt="<?= htmlspecialchars($album['alt_text'] ?: ($album['title'] . ($album['year'] ? ', ' . $album['year'] : '') . ' — Kutumba album cover'), ENT_QUOTES, 'UTF-8') ?>"
               loading="lazy"
             >
 

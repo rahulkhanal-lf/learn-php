@@ -1,0 +1,15 @@
+# robots.txt — tells search engine crawlers what they may and may not index.
+#
+# CONCEPT:
+#   User-agent: *   → applies to all crawlers (Googlebot, Bingbot, etc.)
+#   Disallow:       → block this path from being crawled/indexed
+#   Allow:          → explicitly permit (overrides a broader Disallow)
+#
+# Why block /admin/ ?
+#   Admin pages contain no public content and should NEVER appear in Google.
+#   Even if your login page has no sensitive data on it, having admin URLs
+#   in Google's index looks unprofessional and is a minor security signal.
+
+User-agent: *
+Disallow: /learn-php/projects/09-music/public/admin/
+Allow: /

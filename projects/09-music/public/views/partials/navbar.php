@@ -14,15 +14,15 @@
 $currentPage ??= 'home';
 
 $navLinks = [
-    'home'     => ['label' => 'Home',     'href' => 'index.php'],
-    'about'    => ['label' => 'About Us', 'href' => 'index.php?page=about'],
-    'profile'  => ['label' => 'Profile',  'href' => 'index.php?page=profile'],
-    'projects' => ['label' => 'Projects', 'href' => 'index.php?page=projects'],
-    'gallery'  => ['label' => 'Gallery',  'href' => 'index.php?page=gallery'],
-    'events'   => ['label' => 'Events',   'href' => 'index.php?page=events'],
-    'albums'   => ['label' => 'Albums',   'href' => 'index.php?page=albums'],
-    'archives' => ['label' => 'Archives', 'href' => 'index.php?page=archives'],
-    'contact'  => ['label' => 'Contacts', 'href' => 'index.php?page=contact'],
+    'home'     => ['label' => 'Home',     'href' => './'],
+    'about'    => ['label' => 'About Us', 'href' => 'about'],
+    'profile'  => ['label' => 'Profile',  'href' => 'profile'],
+    'projects' => ['label' => 'Projects', 'href' => 'projects'],
+    'gallery'  => ['label' => 'Gallery',  'href' => 'gallery'],
+    'events'   => ['label' => 'Events',   'href' => 'events'],
+    'albums'   => ['label' => 'Albums',   'href' => 'albums'],
+    'archives' => ['label' => 'Archives', 'href' => 'archives'],
+    'contact'  => ['label' => 'Contacts', 'href' => 'contact'],
 ];
 ?>
 
@@ -31,7 +31,7 @@ $navLinks = [
     <nav class="navbar__inner" aria-label="Main navigation">
 
       <!-- Brand / Logo -->
-      <a href="index.php" class="navbar__brand" aria-label="Kutumba home">
+      <a href="./" class="navbar__brand" aria-label="Kutumba home">
         <!--
           CONCEPT: Static image.
           Path is relative to public/ (the web root).

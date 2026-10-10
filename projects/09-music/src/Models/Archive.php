@@ -7,9 +7,9 @@ use App\Database\Connection;
 class Archive extends BaseModel {
     protected string $table = 'archives';
 
-    public function findAll(): array {
+    public function findAll(string $orderBy = 'year ASC'): array {
         $pdo = Connection::getInstance();
-        $stmt = $pdo->query("SELECT * FROM archives ORDER BY year ASC");
+        $stmt = $pdo->query("SELECT * FROM archives ORDER BY {$orderBy}");
         return $stmt->fetchAll();
     }
 
